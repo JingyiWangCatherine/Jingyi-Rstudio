@@ -1,0 +1,96 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(pacman)
+p_load(dplyr,foreign,ggplot2,psych)
+```
+
+##Power and sample size for r
+You plan to conduct a study to examine the association between IQ and
+spatial ability in older adults. Based on your past research, you expect that the true (population)
+correlation between these two variables is likely to be around .20.
+```{r}
+p_load(pwr)
+pwr.r.test(r=0.2,power=0.8,sig.level = 0.05)
+```
+alpha=0.01
+```{r}
+pwr.r.test(r=0.2,power=0.8,sig.level = 0.01)
+```
+Post-hoc Power Analysis: You are planning a study to investigate the association between self-esteem and cortisol (a stress hormone) in response to a stressful speech task. Your theory
+predicts that individuals with high self-esteem should show a lower cortisol response. You have a
+small grant to pay for the biological assays, but your budget will cover only 25 subjects. If you
+expect an effect size of about = -.30, how much statistical power would you have in your study
+(assuming = .05, two-tailed)?
+```{r}
+pwr.r.test(n=25, r=-.30, sig.level = .05)
+```
+
+## Comparing two correlations
+```{r}
+df<-read.spss("Class_Survey.sav", to.data.frame = T)
+```
+```{r}
+df.m <- df %>% filter(gender=="MALE") %>% select(HEIGHT,weight)
+df.f <- df %>% filter(gender=="FEMALE") %>% select(HEIGHT,weight)
+```
+```{r}
+describe(df.m)
+```
+
+```{r}
+describe(df.f)
+```
+```{r}
+hist(df.m$HEIGHT)
+ggplot(df,aes(x=weight,fill=gender))+geom_histogram(color="white",alpha=.5,position = "identity",binwidth = 10)+ggtitle("Distribution of weight by gender") #position="identity":so that two plots are overlay, not stack.
+```
+```{r}
+cor.test(df.f$HEIGHT,df.f$weight)
+cor.test(df.m$HEIGHT,df.m$weight)
+```
+```{r}
+r.test(n=52,r12=.296,n2=31,r34=.609)
+```
+The correlation of weight and height for men and women are not significantly different from each other.
+```{r}
+r.test(n=104,r12=.296,n2=62,r34=.609)
+```
+
+```{r}
+r.test(n=nrow(na.omit(df.f)),r12=cor(df.f$weight,df.f$HEIGHT,use="complete.obs"), r34=cor(df.m$weight, df.m$HEIGHT), n2=nrow(df.m))
+
+```
+## Bivariate regression
+```{r}
+mod1<-lm(lifesat~friends1,data=df)
+summary(mod1)
+```
+In R: intercept=intercept (estimate Std.); unstandardized slope (b): estimate std; standard error of b:error; t-statistic for b: t value; p-value for b: Pr; Standard error of estimate (or prediction): Residual standard error. 
+```{r}
+p_load(lm.beta)
+lm.beta(mod1)
+```
+```{r}
+summary(lm.beta(mod1))
+```
+**The result of summary(mod1) and summary(lm.beta(mod1)) is the same? **
+
+```{r}
+plot(df$friends1,df$lifesat)
+abline(mod1,col="red")
+```
+```{r}
+ggplot(df,aes(x=friends1,y=lifesat)) + geom_point() + geom_smooth(method = lm,fullrange=T) + xlim(c(0,7)) + theme_bw()
+```
+

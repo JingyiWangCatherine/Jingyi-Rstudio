@@ -1,0 +1,108 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+Friends <- c(1, 2, 2, 3, 3, 4, 4, 4, 5, 5)
+Depression <- c(5, 4, 6, 3, 2, 2, 2, 4, 2, 3)
+df <-cbind.data.frame(Friends,Depression)
+colnames(df)<-c(Friends, Depression)
+install.packages("pacman")
+library(pacman)
+p_load(psych)
+describe (df)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+hist(df$Friends)
+```
+```{r}
+hist(df$Depression)
+```
+```{r}
+plot(Friends,Depression)
+abline(lm(Depression~Friends, data=df))
+```
+```{r}
+p_load(ggplot2)
+```
+
+
+```{r}
+cor(df$Friends,df$Depression)
+cor.test(df$Friends,df$Depression)
+```
+```{r}
+ggplot(df,aes(x=Friends,y=Depression))+geom_point()+geom_smooth(method=lm,col="blue")#The gray is SE
+
+```
+```{r}
+p_load(foreign)
+p_load(dplyr)
+```
+
+```{r}
+df<-read.spss("Class_Survey.sav", to.data.frame = T)
+```
+
+```{r}
+describe(df$lifesat)
+```
+
+```{r}
+df %>% select(lifesat,friends1) %>%describe()
+```
+
+```{r}
+hist(df$lifesat)
+hist(df$friends1)
+```
+
+```{r}
+cor.test(df$lifesat,df$friends1) 
+cor.test(df$lifesat,df$friends1, conf.level = 0.99)
+cor.test(df$lifesat,df$friends1)$conf.int #Show the alpha value of confidence interval.
+```
+## **using bootstrap methods to calculate confidence interval**
+Using the boot command  
+Before calling **boot**, you need to define a function (eg. pearson) that will return the statistic(s) that you would like to bootstrap.  The first argument passed to the function should be your dataset.  The second argument can be an index vector of the observations in your dataset to use or a frequency or weight vector that informs the sampling probabilities. 
+```{r}
+p_load(boot)
+```
+
+```{r}
+pearson<-function(d,i) {
+  d<- d[i,]
+  return(cor(d)[2]) 
+}
+r1000<-boot(data=cbind(df$lifesat,df$friends1),pearson, R=1000)
+boot.ci(r1000,type='perc')
+```
+```{r}
+df %>% select(Obama,beer) %>%describe()
+```
+
+```{r}
+hist(df$Obama)
+hist(df$beer)
+```
+```{r}
+ggplot(df,aes(x=beer,y=Obama))+geom_point()+geom_smooth(method=lm,col="blue")
+```
+```{r}
+cor.test(df$Obama,df$beer)
+```
+
